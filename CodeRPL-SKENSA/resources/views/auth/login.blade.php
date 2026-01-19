@@ -4,214 +4,67 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login - Modern UI</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
 <style>
-/* === Reset & Globals === */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-body {
-    font-family: 'Inter', sans-serif;
-    height: 100vh;
-    width: 100%;
-    overflow: hidden;
-    background: linear-gradient(135deg,#1f2937,#111827);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    cursor: none;
-}
-
-/* === Bubble Background === */
-.bubble {
-    position: absolute;
-    border-radius: 50%;
-    pointer-events: none;
-    animation: floatUp linear infinite;
-}
+/* === Bubble Animation === */
 @keyframes floatUp {
-    0% { transform: translateY(0) scale(0.5); opacity:1; }
-    100% { transform: translateY(-1500px) scale(1.5); opacity:0; }
+  0% { transform: translateY(0) scale(0.5); opacity:1; }
+  100% { transform: translateY(-1500px) scale(1.5); opacity:0; }
+}
+.bubble {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  animation: floatUp linear infinite;
 }
 
-/* === Container === */
-.container {
-    position: relative;
-    z-index: 10;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* === Login Card === */
-.login-card {
-    background-color: #fff;
-    border-radius: 20px;
-    width: 100%;
-    max-width: 420px;
-    padding: 50px 40px;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.25);
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.login-card:hover {
-    transform: translateY(-5px) perspective(500px) rotateX(2deg);
-    box-shadow: 0 30px 60px rgba(0,0,0,0.35);
-}
-
-/* Card Header */
-.login-card h2 {
-    font-size: 2rem;
-    color: #2563eb;
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-/* Input Fields */
-.form-input {
-    width: 100%;
-    padding: 16px;
-    border-radius: 12px;
-    border: 1px solid #ddd;
-    font-size: 16px;
-    transition: border 0.3s ease, box-shadow 0.3s ease;
-}
-.form-input:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 10px rgba(37,99,235,0.4);
-}
-
-/* Labels */
-.form-label {
-    font-weight: 500;
-    color: #374151;
-    margin-bottom: 6px;
-    display: block;
-}
-
-/* Button */
-.btn-primary {
-    width: 100%;
-    padding: 16px;
-    background-color: #2563eb;
-    color: #fff;
-    font-weight: 600;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
-    font-size: 18px;
-    transition: background-color 0.3s, transform 0.2s;
-}
-.btn-primary:hover {
-    background-color: #1d4ed8;
-    transform: scale(1.05);
-}
-
-/* Checkbox */
-.checkbox-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 14px;
-    color: #6b7280;
-}
-.checkbox-container input {
-    accent-color: #2563eb;
-}
-
-/* Forgot Password */
-.forgot {
-    text-align: right;
-    font-size: 14px;
-}
-.forgot a {
-    color: #2563eb;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-.forgot a:hover {
-    color: #1d4ed8;
-}
-
-/* Error Message */
-.error-message {
-    font-size: 13px;
-    color: #f87171;
-    margin-top: 4px;
-}
-
-/* Cursor Trail Particles */
+/* Cursor particle */
 .cursor-particle {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    opacity: 1;
-    will-change: transform, opacity;
-}
-
-/* Responsive */
-@media(max-width:768px){
-    .login-card{
-        padding: 30px 20px;
-    }
-    .login-card h2{
-        font-size: 1.5rem;
-    }
-    .form-input{
-        padding: 12px;
-        font-size: 14px;
-    }
-    .btn-primary{
-        font-size: 16px;
-        padding: 14px;
-    }
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  opacity: 1;
+  will-change: transform, opacity;
 }
 </style>
 </head>
-<body>
+<body class="h-screen w-screen overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center relative cursor-none font-inter">
 
-<!-- Login Container -->
-<div class="container">
-    <div class="login-card">
-        <h2>Welcome Back</h2>
+<!-- Login Card -->
+<div class="relative z-10 w-full max-w-md p-10 md:p-12 bg-white rounded-2xl flex flex-col gap-5 shadow-2xl transition-transform duration-300 hover:-translate-y-1 hover:rotate-x-1 hover:shadow-[0_30px_60px_rgba(0,0,0,0.35)]">
+    <h2 class="text-3xl md:text-4xl text-blue-600 font-semibold text-center mb-8">Welcome Back</h2>
 
-        <form method="POST" action="{{ route('login') }}">
-            @csrf
+    <form method="POST" action="{{ route('login') }}" class="flex flex-col gap-5">
+        @csrf
 
-            <label for="email" class="form-label">Email</label>
-            <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus class="form-input">
-            @error('email')<span class="error-message">{{ $message }}</span>@enderror
+        <div class="flex flex-col gap-1">
+            <label for="email" class="text-gray-700 font-medium">Email</label>
+            <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
+                   class="w-full p-4 rounded-xl border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition">
+            @error('email')<span class="text-red-500 text-sm mt-1">{{ $message }}</span>@enderror
+        </div>
 
-            <label for="password" class="form-label">Password</label>
-            <input id="password" type="password" name="password" required class="form-input">
-            @error('password')<span class="error-message">{{ $message }}</span>@enderror
+        <div class="flex flex-col gap-1">
+            <label for="password" class="text-gray-700 font-medium">Password</label>
+            <input id="password" type="password" name="password" required
+                   class="w-full p-4 rounded-xl border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition">
+            @error('password')<span class="text-red-500 text-sm mt-1">{{ $message }}</span>@enderror
+        </div>
 
-            <div class="checkbox-container">
-                <input type="checkbox" name="remember" id="remember">
-                <label for="remember">Remember me</label>
-            </div>
+        <div class="flex items-center gap-2 text-gray-500 text-sm">
+            <input type="checkbox" name="remember" id="remember" class="accent-blue-600">
+            <label for="remember">Remember me</label>
+        </div>
 
-            <div class="forgot">
-                @if(Route::has('password.request'))
-                <a href="{{ route('password.request') }}">Forgot your password?</a>
-                @endif
-            </div>
+        <div class="text-right text-sm">
+            @if(Route::has('password.request'))
+            <a href="{{ route('password.request') }}" class="text-blue-600 hover:text-blue-700">Forgot your password?</a>
+            @endif
+        </div>
 
-            <button type="submit" class="btn-primary">Log In</button>
-        </form>
-    </div>
+        <button type="submit" class="w-full p-4 bg-blue-600 text-white font-semibold text-lg rounded-xl hover:bg-blue-700 hover:scale-105 transition">Log In</button>
+    </form>
 </div>
 
 <script>
@@ -237,7 +90,6 @@ for(let i=0;i<bubbleCount;i++){
 // ===== CURSOR TRAIL =====
 const trailParticles = [];
 const maxTrail = 100;
-
 document.addEventListener('mousemove', (e)=>{
     for(let i=0;i<8;i++){
         const p = document.createElement('div');
@@ -256,7 +108,6 @@ document.addEventListener('mousemove', (e)=>{
             old.remove();
         }
 
-        // Animate particle
         let lifetime = 0;
         const animate = ()=>{
             lifetime += 0.006 + Math.random()*0.002;
