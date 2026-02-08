@@ -1,11 +1,11 @@
-@extends('admin.dashboard')
+@extends('admin.dashboard') 
 
 @section('content')
-<div class="page-header">
+<div class="page-header"> 
     <h1 class="font-playfair">Tambah Alumni Baru</h1>
     <p>Tambahkan data alumni jurusan RPL</p>
 </div>
-
+<!-- satria -->
 <div class="crud-section">
     <div class="form-container">
         <form action="{{ route('admin.alumni.store') }}" method="POST" enctype="multipart/form-data">
