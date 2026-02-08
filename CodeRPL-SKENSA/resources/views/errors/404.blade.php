@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* This is 404 */
         /* Animasi fade in */
         .fade-in {
             animation: fadeIn 1s ease-in-out forwards;
