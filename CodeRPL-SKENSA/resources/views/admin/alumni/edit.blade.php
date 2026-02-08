@@ -5,7 +5,7 @@
     <h1 class="font-playfair">Edit Data Alumni</h1>
     <p>Perbarui data alumni {{ $alumni->nama }}</p>
 </div>
-
+<!--Alumni-->
 <div class="crud-section">
     <div class="form-container">
         <form action="{{ route('admin.alumni.update', $alumni->id) }}" method="POST" enctype="multipart/form-data">
