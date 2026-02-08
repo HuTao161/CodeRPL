@@ -75,4 +75,26 @@ class AuthController extends Controller
 
         return redirect('/')->with('success', 'Logout berhasil!');
     }
+
+    // ============================
+    // Handle Guest Login
+    // ============================
+    public function guestLogin(Request $request)
+    {
+        // Cari user guest di DB, email: guest@example.com
+        $guest = User::firstOrCreate(
+            ['email' => 'guest@example.com'],
+            [
+                'name' => 'Guest User',
+                'password' => Hash::make(uniqid()), // random password
+                'role' => 'guest'
+            ]
+        );
+
+        // Login user guest
+        Auth::login($guest);
+
+        // Redirect ke homepage atau dashboard
+        return redirect('/')->with('success', 'Login sebagai Guest berhasil!');
+    }
 }
