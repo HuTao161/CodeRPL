@@ -92,6 +92,7 @@
         align-items: center;
         justify-content: center;
         overflow: hidden;
+        position: relative;
     }
     
     .alumni-photo img {
@@ -173,6 +174,7 @@
         font-size: 14px;
         font-weight: 500;
         transition: all 0.3s ease;
+        cursor: pointer;
     }
     
     .angkatan-filter:hover {
@@ -305,6 +307,18 @@
         background: #1d4ed8;
         transform: translateY(-3px);
     }
+
+    /* Photo placeholder */
+    .photo-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 40px;
+    }
 </style>
 @endsection
 
@@ -316,7 +330,7 @@
             <i class="fas fa-user-graduate"></i> Database Alumni
         </h1>
         <p class="page-description">
-            Temukan alumni Jurusan RPL SMKN 1 Denpasar dari angkatan 1 hingga 65. Lihat perkembangan karir mereka setelah lulus.
+            Temukan alumni Jurusan RPL SMKN 1 Denpasar dari berbagai angkatan. Lihat perkembangan karir mereka setelah lulus.
         </p>
     </div>
 </section>
@@ -324,11 +338,14 @@
 <div class="container">
     <!-- Search Section -->
     <section class="search-section">
-        <form action="#" method="GET" class="search-box">
+        <form action="{{ route('alumni.search') }}" method="GET" class="search-box" id="searchForm">
+            @csrf
             <input type="text" 
                    class="search-input" 
+                   name="search"
                    placeholder="Cari alumni berdasarkan nama, angkatan, atau perusahaan..."
-                   id="searchAlumni">
+                   id="searchAlumni"
+                   value="{{ request('search') }}">
             <button type="submit" class="search-btn">
                 <i class="fas fa-search"></i> Cari
             </button>
@@ -344,143 +361,83 @@
 
     <!-- Alumni by Angkatan -->
     <div id="alumniContainer">
-        @for($angkatan = 65; $angkatan >= 1; $angkatan--)
-        <section class="angkatan-section" id="angkatan-{{ $angkatan }}" data-angkatan="{{ $angkatan }}">
-            <div class="angkatan-header">
-                <h2 class="angkatan-title">
-                    <i class="fas fa-users"></i>
-                    Angkatan <span class="angkatan-year">{{ $angkatan }}</span>
-                </h2>
-                <span class="angkatan-count">{{ rand(8, 25) }} Alumni</span>
+        @if($alumniByAngkatan->isEmpty())
+            <div class="empty-state" id="emptyState">
+                <i class="fas fa-user-graduate"></i>
+                <h3>Data alumni belum tersedia</h3>
+                <p>Belum ada data alumni yang dapat ditampilkan.</p>
             </div>
-            
-            <div class="alumni-grid">
-                <!-- Alumni 1 -->
-                <div class="alumni-card">
-                    <div class="alumni-photo">
-                        <div class="default-photo">
-                            <i class="fas fa-user-graduate"></i>
-                        </div>
+        @else
+            @foreach($alumniByAngkatan as $angkatan => $alumniList)
+                <section class="angkatan-section" id="angkatan-{{ $angkatan }}" data-angkatan="{{ $angkatan }}">
+                    <div class="angkatan-header">
+                        <h2 class="angkatan-title">
+                            <i class="fas fa-users"></i>
+                            Angkatan <span class="angkatan-year">{{ $angkatan }}</span>
+                        </h2>
+                        <span class="angkatan-count">{{ $alumniList->count() }} Alumni</span>
                     </div>
-                    <div class="alumni-info">
-                        <h3 class="alumni-name">Budi Santoso</h3>
-                        <div class="alumni-details">
-                            <div class="detail-item">
-                                <i class="fas fa-calendar-alt"></i>
-                                <span>Lulus: {{ 2000 + $angkatan }}</span>
+                    
+                    <div class="alumni-grid">
+                        @foreach($alumniList as $alumni)
+                            <div class="alumni-card" data-name="{{ strtolower($alumni->nama) }}" 
+                                 data-angkatan="{{ $angkatan }}"
+                                 data-pkl="{{ strtolower($alumni->tempat_pkl ?? '') }}"
+                                 data-kerja="{{ strtolower($alumni->tempat_kerja ?? '') }}">
+                                <div class="alumni-photo">
+                                    @if($alumni->foto)
+                                        <img src="{{ asset('storage/alumni/' . $alumni->foto) }}" 
+                                             alt="{{ $alumni->nama }}"
+                                             onerror="this.onerror=null; this.src='{{ asset('images/default-avatar.png') }}';">
+                                    @else
+                                        <div class="photo-placeholder">
+                                            <i class="fas fa-user-graduate"></i>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="alumni-info">
+                                    <h3 class="alumni-name">{{ $alumni->nama }}</h3>
+                                    <div class="alumni-details">
+                                        <div class="detail-item">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <span>Tahun Lulus: {{ $alumni->tahun_lulus ?? 'Tidak diketahui' }}</span>
+                                        </div>
+                                        @if($alumni->tempat_pkl)
+                                        <div class="detail-item">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span>PKL: {{ $alumni->tempat_pkl }}</span>
+                                        </div>
+                                        @endif
+                                        @if($alumni->tempat_kerja)
+                                        <div class="detail-item">
+                                            <i class="fas fa-building"></i>
+                                            <span>Bekerja: {{ $alumni->tempat_kerja }}</span>
+                                        </div>
+                                        @endif
+                                        @if($alumni->jabatan)
+                                        <div class="detail-item">
+                                            <i class="fas fa-briefcase"></i>
+                                            <span>Posisi: {{ $alumni->jabatan }}</span>
+                                        </div>
+                                        @endif
+                                        @if($alumni->kontak)
+                                        <div class="detail-item">
+                                            <i class="fas fa-phone"></i>
+                                            <span>Kontak: {{ $alumni->kontak }}</span>
+                                        </div>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
-                            <div class="detail-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>PKL: PT. Teknologi Indonesia</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-building"></i>
-                                <span>Bekerja: Google Indonesia</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-briefcase"></i>
-                                <span>Posisi: Software Engineer</span>
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
-                </div>
-                
-                <!-- Alumni 2 -->
-                <div class="alumni-card">
-                    <div class="alumni-photo">
-                        <div class="default-photo">
-                            <i class="fas fa-user-graduate"></i>
-                        </div>
-                    </div>
-                    <div class="alumni-info">
-                        <h3 class="alumni-name">Sari Dewi</h3>
-                        <div class="alumni-details">
-                            <div class="detail-item">
-                                <i class="fas fa-calendar-alt"></i>
-                                <span>Lulus: {{ 2000 + $angkatan }}</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>PKL: Startup Bali Tech</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-building"></i>
-                                <span>Bekerja: Tokopedia</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-briefcase"></i>
-                                <span>Posisi: Frontend Developer</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Alumni 3 -->
-                <div class="alumni-card">
-                    <div class="alumni-photo">
-                        <div class="default-photo">
-                            <i class="fas fa-user-graduate"></i>
-                        </div>
-                    </div>
-                    <div class="alumni-info">
-                        <h3 class="alumni-name">Ari Wibawa</h3>
-                        <div class="alumni-details">
-                            <div class="detail-item">
-                                <i class="fas fa-calendar-alt"></i>
-                                <span>Lulus: {{ 2000 + $angkatan }}</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>PKL: Bali Digital Studio</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-building"></i>
-                                <span>Bekerja: Traveloka</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-briefcase"></i>
-                                <span>Posisi: Backend Developer</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Alumni 4 -->
-                <div class="alumni-card">
-                    <div class="alumni-photo">
-                        <div class="default-photo">
-                            <i class="fas fa-user-graduate"></i>
-                        </div>
-                    </div>
-                    <div class="alumni-info">
-                        <h3 class="alumni-name">Putu Adi</h3>
-                        <div class="alumni-details">
-                            <div class="detail-item">
-                                <i class="fas fa-calendar-alt"></i>
-                                <span>Lulus: {{ 2000 + $angkatan }}</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>PKL: PT. Solusi Digital</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-building"></i>
-                                <span>Bekerja: Bukalapak</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-briefcase"></i>
-                                <span>Posisi: Full Stack Developer</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        @endfor
+                </section>
+            @endforeach
+        @endif
     </div>
 
-    <!-- Empty State (hidden by default) -->
-    <div class="empty-state" id="emptyState" style="display: none;">
+    <!-- Empty State for search results -->
+    <div class="empty-state" id="searchEmptyState" style="display: none;">
         <i class="fas fa-search"></i>
         <h3>Alumni tidak ditemukan</h3>
         <p>Coba gunakan kata kunci pencarian yang berbeda atau filter angkatan lainnya.</p>
@@ -496,46 +453,48 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Get unique angkatans from DOM
+        const angkatanSections = document.querySelectorAll('.angkatan-section');
+        const angkatanNumbers = Array.from(angkatanSections)
+            .map(section => parseInt(section.dataset.angkatan))
+            .sort((a, b) => b - a); // Sort descending
+        
         // Generate angkatan filters
         const filtersContainer = document.getElementById('angkatanFilters');
         let filtersHTML = '';
         
-        // Add "Semua" filter
-        filtersHTML += '<a href="#all" class="angkatan-filter active" data-angkatan="all">Semua</a>';
-        
-        // Generate filters for each angkatan (grouped by decades)
-        for(let i = 65; i >= 1; i--) {
-            if(i % 10 === 0 || i === 65 || i === 1) {
-                // Show decade markers
-                if(i === 65) {
-                    filtersHTML += `<span style="padding: 8px 5px; color: var(--gray);">|</span>`;
+        if (angkatanNumbers.length > 0) {
+            // Add "Semua" filter
+            filtersHTML += '<span class="angkatan-filter active" data-angkatan="all">Semua</span>';
+            
+            // Generate filters for each angkatan
+            angkatanNumbers.forEach((angkatan, index) => {
+                if (index < 8) { // Show first 8 angkatans
+                    filtersHTML += `<span class="angkatan-filter" data-angkatan="${angkatan}">${angkatan}</span>`;
                 }
-                filtersHTML += `<a href="#angkatan-${i}" class="angkatan-filter" data-angkatan="${i}">${i}</a>`;
+            });
+            
+            // Add "Lainnya" dropdown for other angkatans if there are more than 8
+            if (angkatanNumbers.length > 8) {
+                filtersHTML += `
+                    <span class="angkatan-filter" id="moreAngkatan" style="position: relative;">
+                        Lainnya <i class="fas fa-chevron-down"></i>
+                        <div class="dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-radius: 8px; padding: 10px; min-width: 150px; z-index: 1000; max-height: 300px; overflow-y: auto;">
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;">
+                `;
+                
+                // Add remaining angkatans to dropdown
+                angkatanNumbers.slice(8).forEach(angkatan => {
+                    filtersHTML += `<span class="angkatan-filter" data-angkatan="${angkatan}" style="font-size: 12px; padding: 5px 10px;">${angkatan}</span>`;
+                });
+                
+                filtersHTML += `
+                            </div>
+                        </div>
+                    </span>
+                `;
             }
         }
-        
-        // Add "Lainnya" dropdown for other angkatans
-        filtersHTML += `
-            <div class="angkatan-filter" style="position: relative;">
-                <span style="cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
-                    Lainnya <i class="fas fa-chevron-down"></i>
-                </span>
-                <div class="dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-radius: 8px; padding: 10px; min-width: 150px; z-index: 1000; max-height: 300px; overflow-y: auto;">
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;">
-        `;
-        
-        // Add all other angkatans to dropdown
-        for(let i = 64; i >= 2; i--) {
-            if(i % 10 !== 0) {
-                filtersHTML += `<a href="#angkatan-${i}" class="angkatan-filter" data-angkatan="${i}" style="font-size: 12px; padding: 5px 10px;">${i}</a>`;
-            }
-        }
-        
-        filtersHTML += `
-                    </div>
-                </div>
-            </div>
-        `;
         
         filtersContainer.innerHTML = filtersHTML;
         
@@ -543,6 +502,8 @@
         document.querySelectorAll('.angkatan-filter').forEach(filter => {
             filter.addEventListener('click', function(e) {
                 e.preventDefault();
+                
+                const angkatan = this.getAttribute('data-angkatan');
                 
                 // Remove active class from all filters
                 document.querySelectorAll('.angkatan-filter').forEach(f => {
@@ -552,14 +513,12 @@
                 // Add active class to clicked filter
                 this.classList.add('active');
                 
-                const angkatan = this.getAttribute('data-angkatan');
-                
                 if(angkatan === 'all') {
                     // Show all angkatans
                     document.querySelectorAll('.angkatan-section').forEach(section => {
                         section.style.display = 'block';
                     });
-                    document.getElementById('emptyState').style.display = 'none';
+                    document.getElementById('searchEmptyState').style.display = 'none';
                 } else {
                     // Show only selected angkatan
                     document.querySelectorAll('.angkatan-section').forEach(section => {
@@ -569,35 +528,44 @@
                     const targetSection = document.getElementById(`angkatan-${angkatan}`);
                     if(targetSection) {
                         targetSection.style.display = 'block';
-                        document.getElementById('emptyState').style.display = 'none';
+                        document.getElementById('searchEmptyState').style.display = 'none';
                         
                         // Scroll to the section
-                        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        setTimeout(() => {
+                            targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 100);
                     }
                 }
             });
         });
         
         // Handle "Lainnya" dropdown
-        const lainnyaBtn = filtersContainer.querySelector('.angkatan-filter span');
-        const dropdownMenu = filtersContainer.querySelector('.dropdown-menu');
-        
-        lainnyaBtn.addEventListener('click', function() {
-            dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
-        });
-        
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(e) {
-            if(!e.target.closest('.angkatan-filter')) {
-                dropdownMenu.style.display = 'none';
-            }
-        });
+        const moreAngkatan = document.getElementById('moreAngkatan');
+        if (moreAngkatan) {
+            const dropdownMenu = moreAngkatan.querySelector('.dropdown-menu');
+            
+            moreAngkatan.addEventListener('click', function(e) {
+                if (!e.target.classList.contains('angkatan-filter')) {
+                    dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
+                }
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('#moreAngkatan')) {
+                    dropdownMenu.style.display = 'none';
+                }
+            });
+        }
         
         // Search functionality
         const searchInput = document.getElementById('searchAlumni');
+        const searchForm = document.getElementById('searchForm');
         const alumniCards = document.querySelectorAll('.alumni-card');
-        const angkatanSections = document.querySelectorAll('.angkatan-section');
+        const angkatanSectionsArray = document.querySelectorAll('.angkatan-section');
+        const searchEmptyState = document.getElementById('searchEmptyState');
         
+        // Real-time search for frontend filtering
         searchInput.addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase().trim();
             let hasResults = false;
@@ -607,24 +575,24 @@
                 alumniCards.forEach(card => {
                     card.style.display = 'flex';
                 });
-                angkatanSections.forEach(section => {
+                angkatanSectionsArray.forEach(section => {
                     section.style.display = 'block';
                 });
-                document.getElementById('emptyState').style.display = 'none';
+                searchEmptyState.style.display = 'none';
                 return;
             }
             
-            // Hide all sections first
-            angkatanSections.forEach(section => {
-                section.style.display = 'none';
-            });
-            
             // Search through alumni cards
             alumniCards.forEach(card => {
-                const alumniName = card.querySelector('.alumni-name').textContent.toLowerCase();
-                const alumniDetails = card.querySelector('.alumni-details').textContent.toLowerCase();
+                const alumniName = card.dataset.name;
+                const alumniAngkatan = card.dataset.angkatan;
+                const alumniPkl = card.dataset.pkl;
+                const alumniKerja = card.dataset.kerja;
                 
-                if(alumniName.includes(searchTerm) || alumniDetails.includes(searchTerm)) {
+                if(alumniName.includes(searchTerm) || 
+                   alumniAngkatan.includes(searchTerm) ||
+                   alumniPkl.includes(searchTerm) ||
+                   alumniKerja.includes(searchTerm)) {
                     card.style.display = 'flex';
                     hasResults = true;
                     
@@ -638,11 +606,19 @@
                 }
             });
             
+            // Hide empty angkatan sections
+            angkatanSectionsArray.forEach(section => {
+                const visibleCards = section.querySelectorAll('.alumni-card[style*="display: flex"]');
+                if (visibleCards.length === 0) {
+                    section.style.display = 'none';
+                }
+            });
+            
             // Show empty state if no results
             if(!hasResults) {
-                document.getElementById('emptyState').style.display = 'block';
+                searchEmptyState.style.display = 'block';
             } else {
-                document.getElementById('emptyState').style.display = 'none';
+                searchEmptyState.style.display = 'none';
             }
         });
         
@@ -669,7 +645,9 @@
                 const angkatan = hash.replace('angkatan-', '');
                 const filter = document.querySelector(`.angkatan-filter[data-angkatan="${angkatan}"]`);
                 if(filter) {
-                    filter.click();
+                    setTimeout(() => {
+                        filter.click();
+                    }, 500);
                 }
             }
         }
