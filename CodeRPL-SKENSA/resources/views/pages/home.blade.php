@@ -34,12 +34,6 @@
                         <i class="fas fa-industry mr-2"></i>
                         Jelajahi Industri
                     </a>
-                    
-                    <a href="{{ route('alumni.index') }}" 
-                       class="border-2 border-white/30 text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition-all card-hover">
-                        <i class="fas fa-user-graduate mr-2"></i>
-                        Lihat Alumni
-                    </a>
                 </div>
             </div>
             

@@ -21,12 +21,6 @@
                         industri PKL, dan data siswa jurusan RPL SMKN 1 Denpasar.
                     </p>
 
-                    <div class="flex gap-4">
-                        <a href="{{ route('alumni.index') }}"
-                           class="px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
-                           👨‍🎓 Lihat Alumni
-                        </a>
-
                         <a href="{{ route('industri.index') }}"
                            class="px-6 py-3 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition">
                            🏭 Lihat Industri

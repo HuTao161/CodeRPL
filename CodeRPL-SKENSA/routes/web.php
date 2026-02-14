@@ -3,11 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AlumniController;
 use App\Http\Controllers\IndustriController;
 use App\Http\Controllers\AdminController;
 use App\Http\Middleware\AdminMiddleware;
-use App\Models\Alumni;
 use App\Models\Industri;
 
 /*
@@ -16,34 +14,14 @@ use App\Models\Industri;
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
-    $totalAlumni = Alumni::count();
     $totalIndustri = Industri::count();
     $industriTersedia = Industri::where('status', 'tersedia')->count();
 
     return view('pages.home', compact(
-        'totalAlumni',
         'totalIndustri',
         'industriTersedia'
     ));
 })->name('home');
-
-/*
-|--------------------------------------------------------------------------
-| PUBLIC ALUMNI ROUTES
-|--------------------------------------------------------------------------
-*/
-Route::prefix('alumni')->name('alumni.')->group(function () {
-    Route::get('/', [AlumniController::class, 'index'])->name('index');
-    Route::get('/search', [AlumniController::class, 'search'])->name('search');
-
-    // FILTER ANGKATAN HARUS DI ATAS {alumni}
-    Route::get('/angkatan/{angkatan}', [AlumniController::class, 'getByAngkatan'])
-        ->name('by-angkatan');
-
-    // DETAIL ALUMNI (MODEL BINDING)
-    Route::get('/{alumni}', [AlumniController::class, 'show'])
-        ->name('show');
-});
 
 /*
 |--------------------------------------------------------------------------
@@ -55,17 +33,43 @@ Route::get('/industri', [IndustriController::class, 'index'])
 
 /*
 |--------------------------------------------------------------------------
-| AUTH ROUTES (CUSTOM LOGIN REGISTER)
+| AUTH ROUTES
 |--------------------------------------------------------------------------
 */
 Route::middleware('guest')->group(function () {
+
+    // LOGIN
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::get('/guest-login', [AuthController::class, 'showLogin'])->name('guest.login');
     Route::post('/login', [AuthController::class, 'login']);
 
+    // REGISTER
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
+
+    // PASSWORD RESET
+    Route::get('/forgot-password', function () {
+        return view('auth.forgot-password');
+    })->name('password.request');
+
+    Route::post('/forgot-password', function () {
+        return back()->with('status', 'Reset link sent!');
+    })->name('password.email');
+
+    Route::get('/reset-password/{token}', function ($token) {
+        return view('auth.reset-password', ['token' => $token]);
+    })->name('password.reset');
+
+    Route::post('/reset-password', function () {
+        return redirect()->route('login');
+    })->name('password.update');
 });
 
+/*
+|--------------------------------------------------------------------------
+| LOGOUT
+|--------------------------------------------------------------------------
+*/
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
@@ -92,28 +96,9 @@ Route::middleware(['auth', AdminMiddleware::class])
     ->name('admin.')
     ->group(function () {
 
-        // Dashboard
+        // DASHBOARD
         Route::get('/dashboard', [AdminController::class, 'dashboard'])
             ->name('dashboard');
-
-        /*
-        |--------------------------------------------------------------------------
-        | ALUMNI MANAGEMENT
-        |--------------------------------------------------------------------------
-        */
-        Route::prefix('manage-alumni')->name('manage.alumni.')->group(function () {
-            Route::get('/', [AdminController::class, 'alumniIndex'])->name('index');
-            Route::get('/create', [AdminController::class, 'alumniCreate'])->name('create');
-            Route::post('/', [AdminController::class, 'alumniStore'])->name('store');
-            Route::get('/{id}/edit', [AdminController::class, 'alumniEdit'])->name('edit');
-            Route::put('/{id}', [AdminController::class, 'alumniUpdate'])->name('update');
-            Route::delete('/{id}', [AdminController::class, 'alumniDestroy'])->name('destroy');
-
-            // Import Export
-            Route::get('/export', [AdminController::class, 'exportAlumni'])->name('export');
-            Route::post('/import', [AdminController::class, 'importAlumni'])->name('import');
-            Route::get('/template', [AdminController::class, 'downloadTemplate'])->name('template');
-        });
 
         /*
         |--------------------------------------------------------------------------
@@ -127,13 +112,44 @@ Route::middleware(['auth', AdminMiddleware::class])
             Route::get('/{id}/edit', [AdminController::class, 'industriEdit'])->name('edit');
             Route::put('/{id}', [AdminController::class, 'industriUpdate'])->name('update');
             Route::delete('/{id}', [AdminController::class, 'industriDestroy'])->name('destroy');
+            
+            // Route untuk industri available
+            Route::get('/available', [AdminController::class, 'industriAvailable'])
+                ->name('available');
         });
 
-        // Users
-        Route::get('/users', [AdminController::class, 'usersIndex'])->name('users.index');
+        // ALIAS UNTUK ROUTE INDUSTRI (admin.industri.*)
+        Route::get('/industri', [AdminController::class, 'industriIndex'])
+            ->name('industri.index');
+            
+        Route::get('/industri/create', [AdminController::class, 'industriCreate'])
+            ->name('industri.create');
+            
+        Route::post('/industri', [AdminController::class, 'industriStore'])
+            ->name('industri.store');
+            
+        Route::get('/industri/{id}', [AdminController::class, 'industriShow'])
+            ->name('industri.show');
+            
+        Route::get('/industri/{id}/edit', [AdminController::class, 'industriEdit'])
+            ->name('industri.edit');
+            
+        Route::put('/industri/{id}', [AdminController::class, 'industriUpdate'])
+            ->name('industri.update');
+            
+        Route::delete('/industri/{id}', [AdminController::class, 'industriDestroy'])
+            ->name('industri.destroy');
+            
+        Route::get('/industri/available', [AdminController::class, 'industriAvailable'])
+            ->name('industri.available');
 
-        // Statistik
-        Route::get('/statistics', [AdminController::class, 'getStatistics'])->name('statistics');
+        // USERS
+        Route::get('/users', [AdminController::class, 'usersIndex'])
+            ->name('users.index');
+
+        // STATISTICS
+        Route::get('/statistics', [AdminController::class, 'getStatistics'])
+            ->name('statistics');
     });
 
 /*
@@ -145,8 +161,6 @@ Route::middleware(['auth', AdminMiddleware::class])
     ->prefix('api')
     ->name('api.')
     ->group(function () {
-        Route::get('/alumni/angkatan/{angkatan}', [AlumniController::class, 'getByAngkatan']);
-        Route::get('/alumni/statistics', [AlumniController::class, 'statistics']);
     });
 
 /*

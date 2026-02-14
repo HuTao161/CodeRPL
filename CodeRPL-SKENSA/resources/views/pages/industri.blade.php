@@ -85,7 +85,6 @@
                 <div class="hidden md:flex items-center gap-8">
                     <a href="{{ url('/') }}" class="nav-link text-white font-medium" data-page="home">Beranda</a>
                     <a href="{{ route('industri.index') }}" class="nav-link text-white font-medium active" data-page="industry">Industri</a>
-                    <a href="{{ route('alumni.index') }}" class="nav-link text-white font-medium" data-page="alumni">Alumni</a>
                 </div>
             </div>
         </div>
@@ -342,7 +341,6 @@
                     <ul class="space-y-3 text-slate-400">
                         <li><a href="{{ url('/') }}" class="hover:text-white transition-colors">Beranda</a></li>
                         <li><a href="{{ route('industri.index') }}" class="hover:text-white transition-colors">Industri</a></li>
-                        <li><a href="{{ route('alumni.index') }}" class="hover:text-white transition-colors">Alumni</a></li>
                     </ul>
                 </div>
                 <div>

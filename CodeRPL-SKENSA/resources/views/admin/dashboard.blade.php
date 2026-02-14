@@ -537,12 +537,6 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.alumni.index') }}" class="{{ request()->routeIs('admin.alumni.*') ? 'active' : '' }}">
-                    <i class="fas fa-user-graduate"></i>
-                    Daftar Alumni
-                </a>
-            </li>
-            <li>
                 <a href="{{ route('admin.industri.index') }}" class="{{ request()->routeIs('admin.industri.*') ? 'active' : '' }}">
                     <i class="fas fa-industry"></i>
                     Daftar Industri
@@ -587,9 +581,6 @@
                         <i class="fas fa-external-link-alt"></i>
                         Lihat Website
                     </a>
-                    <a href="{{ route('alumni.index') }}" target="_blank" class="btn btn-info">
-                        <i class="fas fa-user-graduate"></i>
-                        Lihat Alumni
                     </a>
                     <a href="{{ route('industri.index') }}" target="_blank" class="btn btn-success">
                         <i class="fas fa-industry"></i>

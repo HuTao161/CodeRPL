@@ -17,129 +17,24 @@ class AdminController extends Controller
     // ==================== DASHBOARD ====================
     public function dashboard()
     {
-        $totalAlumni = Alumni::count();
         $totalIndustri = Industri::count();
         $industriTersedia = Industri::where('status', 'tersedia')->count();
         $totalUsers = User::count();
         $totalPengajuan = PengajuanPkl::count();
         
         // Recent data
-        $recentAlumni = Alumni::latest()->take(5)->get();
         $recentIndustri = Industri::latest()->take(5)->get();
         $recentPengajuan = PengajuanPkl::with(['user', 'industri'])->latest()->take(5)->get();
         
         return view('admin.dashboard', compact(
-            'totalAlumni', 
             'totalIndustri', 
             'industriTersedia',
             'totalUsers',
             'totalPengajuan',
-            'recentAlumni',
             'recentIndustri',
             'recentPengajuan'
         ));
     }
-
-    // ==================== ALUMNI CRUD ====================
-    public function alumniIndex()
-    {
-        $alumnis = Alumni::orderBy('tahun_lulus', 'desc')->get();
-        return view('admin.alumni.index', compact('alumnis'));
-    }
-
-    public function alumniCreate()
-    {
-        return view('admin.alumni.create');
-    }
-
-    public function alumniStore(Request $request)
-    {
-        $validated = $request->validate([
-            'nama' => 'required|string|max:255',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'tahun_lulus' => 'required|integer|min:2000|max:' . date('Y'),
-            'tempat_pkl' => 'required|string|max:255',
-            'industri_bekerja' => 'nullable|string|max:255',
-            'posisi' => 'nullable|string|max:255',
-            'testimoni' => 'nullable|string',
-            'status_pekerjaan' => 'nullable|in:bekerja,kuliah,wirausaha,lainnya',
-            'jurusan_kuliah' => 'nullable|string|max:255',
-            'universitas' => 'nullable|string|max:255',
-            'alamat' => 'nullable|string',
-            'email' => 'nullable|email|max:255',
-            'telepon' => 'nullable|string|max:20'
-        ]);
-
-        if ($request->hasFile('foto')) {
-            $validated['foto'] = $request->file('foto')->store('alumni', 'public');
-        }
-
-        Alumni::create($validated);
-        return redirect()->route('admin.alumni.index')->with('success', 'Alumni berhasil ditambahkan!');
-    }
-
-    public function alumniShow($id)
-    {
-        $alumni = Alumni::findOrFail($id);
-        return view('admin.alumni.show', compact('alumni'));
-    }
-
-    public function alumniEdit($id)
-    {
-        $alumni = Alumni::findOrFail($id);
-        return view('admin.alumni.edit', compact('alumni'));
-    }
-
-    public function alumniUpdate(Request $request, $id)
-    {
-        $alumni = Alumni::findOrFail($id);
-        
-        $validated = $request->validate([
-            'nama' => 'required|string|max:255',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'tahun_lulus' => 'required|integer|min:2000|max:' . date('Y'),
-            'tempat_pkl' => 'required|string|max:255',
-            'industri_bekerja' => 'nullable|string|max:255',
-            'posisi' => 'nullable|string|max:255',
-            'testimoni' => 'nullable|string',
-            'status_pekerjaan' => 'nullable|in:bekerja,kuliah,wirausaha,lainnya',
-            'jurusan_kuliah' => 'nullable|string|max:255',
-            'universitas' => 'nullable|string|max:255',
-            'alamat' => 'nullable|string',
-            'email' => 'nullable|email|max:255',
-            'telepon' => 'nullable|string|max:20'
-        ]);
-
-        if ($request->hasFile('foto')) {
-            // Delete old photo if exists
-            if ($alumni->foto && Storage::disk('public')->exists($alumni->foto)) {
-                Storage::disk('public')->delete($alumni->foto);
-            }
-            $validated['foto'] = $request->file('foto')->store('alumni', 'public');
-        } elseif ($request->has('remove_foto')) {
-            if ($alumni->foto && Storage::disk('public')->exists($alumni->foto)) {
-                Storage::disk('public')->delete($alumni->foto);
-            }
-            $validated['foto'] = null;
-        }
-
-        $alumni->update($validated);
-        return redirect()->route('admin.alumni.index')->with('success', 'Alumni berhasil diperbarui!');
-    }
-
-    public function alumniDestroy($id)
-    {
-        $alumni = Alumni::findOrFail($id);
-        
-        // Delete photo if exists
-        if ($alumni->foto && Storage::disk('public')->exists($alumni->foto)) {
-            Storage::disk('public')->delete($alumni->foto);
-        }
-        
-        $alumni->delete();
-        return redirect()->route('admin.alumni.index')->with('success', 'Alumni berhasil dihapus!');
-    }
-
     // ==================== INDUSTRI CRUD ====================
     public function industriIndex()
     {
@@ -415,27 +310,12 @@ class AdminController extends Controller
     // ==================== REPORTS ====================
     public function reports()
     {
-        $totalAlumni = Alumni::count();
         $totalIndustri = Industri::count();
         $industriTersedia = Industri::where('status', 'tersedia')->count();
         $totalUsers = User::count();
         $totalPengajuan = PengajuanPkl::count();
         $pengajuanDisetujui = PengajuanPkl::where('status', 'disetujui')->count();
-        
-        // Statistik per bulan
-        $alumniPerMonth = Alumni::selectRaw('YEAR(created_at) year, MONTH(created_at) month, COUNT(*) count')
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'desc')
-            ->take(6)
-            ->get();
-            
-        // Statistik per tahun lulus
-        $alumniPerYear = Alumni::selectRaw('tahun_lulus, COUNT(*) as total')
-            ->groupBy('tahun_lulus')
-            ->orderBy('tahun_lulus', 'desc')
-            ->get();
-            
+
         // Statistik bidang industri
         $industriPerBidang = Industri::selectRaw('bidang, COUNT(*) as total')
             ->groupBy('bidang')
@@ -480,7 +360,6 @@ class AdminController extends Controller
         $today = now()->format('Y-m-d');
         
         $stats = [
-            'total_alumni' => Alumni::count(),
             'total_industri' => Industri::count(),
             'industri_tersedia' => Industri::where('status', 'tersedia')->count(),
             'total_users' => User::count(),
@@ -596,10 +475,6 @@ class AdminController extends Controller
     public function getStatisticsData()
     {
         $data = [
-            'alumni_per_year' => Alumni::selectRaw('tahun_lulus as year, COUNT(*) as count')
-                ->groupBy('tahun_lulus')
-                ->orderBy('tahun_lulus')
-                ->get(),
             'industri_per_field' => Industri::selectRaw('bidang as field, COUNT(*) as count')
                 ->groupBy('bidang')
                 ->get(),

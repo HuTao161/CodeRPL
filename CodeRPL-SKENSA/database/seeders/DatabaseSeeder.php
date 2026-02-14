@@ -28,54 +28,6 @@ class DatabaseSeeder extends Seeder
             'role' => 'siswa'
         ]);
 
-        // Create Alumni Data
-        $alumnis = [
-            [
-                'nama' => 'Ari Wibawa',
-                'tahun_lulus' => 2023,
-                'tempat_pkl' => 'PT. Teknologi Indonesia',
-                'industri_bekerja' => 'Google Indonesia',
-                'posisi' => 'Software Engineer',
-                'testimoni' => 'SMKN 1 Denpasar memberikan dasar yang kuat untuk karir di bidang IT.'
-            ],
-            [
-                'nama' => 'Sari Dewi',
-                'tahun_lulus' => 2022,
-                'tempat_pkl' => 'Startup Bali Tech',
-                'industri_bekerja' => 'Tokopedia',
-                'posisi' => 'Frontend Developer',
-                'testimoni' => 'Pengalaman PKL sangat membantu dalam memahami dunia kerja.'
-            ],
-            [
-                'nama' => 'Putu Adi',
-                'tahun_lulus' => 2021,
-                'tempat_pkl' => 'Bali Digital Studio',
-                'industri_bekerja' => 'Traveloka',
-                'posisi' => 'Backend Developer',
-                'testimoni' => 'Jurusan RPL memberikan skill yang dibutuhkan industri.'
-            ],
-            [
-                'nama' => 'Made Wijaya',
-                'tahun_lulus' => 2020,
-                'tempat_pkl' => 'PT. Solusi Digital',
-                'industri_bekerja' => 'Bukalapak',
-                'posisi' => 'Full Stack Developer',
-                'testimoni' => 'Dasar-dasar pemrograman dari sekolah sangat bermanfaat.'
-            ],
-            [
-                'nama' => 'Ketut Surya',
-                'tahun_lulus' => 2019,
-                'tempat_pkl' => 'Multimedia Bali',
-                'industri_bekerja' => 'Shopee',
-                'posisi' => 'Mobile Developer',
-                'testimoni' => 'Terima kasih kepada guru-guru RPL yang telah membimbing.'
-            ]
-        ];
-
-        foreach ($alumnis as $alumni) {
-            Alumni::create($alumni);
-        }
-
         // Create Industri Data
         $industris = [
             [

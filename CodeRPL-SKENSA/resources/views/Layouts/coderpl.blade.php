@@ -30,7 +30,6 @@
             <!-- Menu -->
             <div class="hidden md:flex items-center gap-6">
                 <a href="{{ route('home') }}" class="hover:text-blue-600">Home</a>
-                <a href="{{ route('alumni.index') }}" class="hover:text-blue-600">Alumni</a>
                 <a href="{{ route('industri.index') }}" class="hover:text-blue-600">Industri</a>
             </div>
 
