@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use App\Models\Alumni;
 use App\Models\Industri;
 use Illuminate\Support\Facades\Hash;
 
@@ -12,23 +11,27 @@ class DatabaseSeeder extends Seeder
 {
     public function run()
     {
-        // Create Admin User
-        User::create([
-            'name' => 'Admin CodeRPL',
-            'email' => 'admin@coderpl.sch.id',
-            'password' => Hash::make(value: 'admin123'),
-            'role' => 'admin'
-        ]);
+        // Create Admin User - menggunakan firstOrCreate agar tidak duplikat
+        User::firstOrCreate(
+            ['email' => 'admin@coderpl.sch.id'],
+            [
+                'name' => 'Admin CodeRPL',
+                'password' => Hash::make('admin123'),
+                'role' => 'admin'
+            ]
+        );
 
         // Create Sample Student User
-        User::create([
-            'name' => 'Budi Santoso',
-            'email' => 'budi@email.com',
-            'password' => Hash::make('password123'),
-            'role' => 'siswa'
-        ]);
+        User::firstOrCreate(
+            ['email' => 'budi@email.com'],
+            [
+                'name' => 'Budi Santoso',
+                'password' => Hash::make('password123'),
+                'role' => 'siswa'
+            ]
+        );
 
-        // Create Industri Data
+        // Data Industri - menggunakan firstOrCreate berdasarkan nama_industri
         $industris = [
             [
                 'nama_industri' => 'PT. Teknologi Indonesia',
@@ -83,7 +86,12 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($industris as $industri) {
-            Industri::create($industri);
+            // Gunakan firstOrCreate untuk menghindari duplikasi data industri
+            // Asumsi nama_industri adalah unik (bisa ditambahkan constraint unique di migrasi)
+            Industri::firstOrCreate(
+                ['nama_industri' => $industri['nama_industri']],
+                $industri
+            );
         }
     }
 }
